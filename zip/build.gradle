@@ -1,0 +1,100 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'jacoco'
+    id 'org.jlleitschuh.gradle.ktlint' version '10.0.0'
+    id 'com.star-zero.gradle.githook' version '1.2.1'
+}
+
+apply from: rootProject.file('gradle/jacoco.gradle')
+
+android {
+    compileSdkVersion versions.compileSdk
+    buildToolsVersion versions.buildTools
+
+    defaultConfig {
+        minSdkVersion versions.minSdk
+        targetSdkVersion versions.targetSdk
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            testCoverageEnabled true
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+        allWarningsAsErrors = true
+        freeCompilerArgs = ['-Xopt-in=kotlin.ExperimentalUnsignedTypes']
+    }
+
+    testOptions {
+        animationsDisabled true
+        unitTests.all {
+            failFast = true
+            jacoco {
+                enabled = true
+            }
+        }
+    }
+
+    jacoco {
+        version versions.deps.jacoco
+    }
+
+    lintOptions {
+        // Disable warning about using older versions of libraries
+        disable 'GradleDependency'
+    }
+}
+
+ktlint {
+    verbose = true
+    enableExperimentalRules = true
+    reporters {
+        reporter "checkstyle"
+    }
+    android = true
+    outputColorName = "RED"
+}
+
+githook {
+    hooks {
+        'pre-commit' {
+            task = 'ktlintFormat ktlintCheck lint'
+        }
+        'pre-push' {
+            task = 'check'
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
+
+    implementation platform("com.squareup.okhttp3:okhttp-bom:${versions.deps.okhttp3}")
+    implementation "com.squareup.okhttp3:okhttp"
+    implementation "com.squareup.okhttp3:logging-interceptor"
+
+    testImplementation "junit:junit:${versions.deps.junit}"
+    testImplementation "org.mockito:mockito-core:${versions.deps.mockito}"
+    testImplementation "org.hamcrest:hamcrest-library:${versions.deps.hamcrest}"
+    testImplementation "com.squareup.okhttp3:mockwebserver"
+}

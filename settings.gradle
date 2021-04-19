@@ -1,0 +1,2 @@
+include ':zip'
+rootProject.name = "Remote Zip"

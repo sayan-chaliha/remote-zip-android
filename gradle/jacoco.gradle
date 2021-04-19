@@ -1,0 +1,67 @@
+jacoco {
+    toolVersion versions.deps.jacoco
+}
+
+ext.jacoco = [
+    sourceDirs: ["${project.projectDir}/src/main/java"],
+    excludes: [
+        '**/R.class',
+        '**/R$*.class',
+        '**/BuildConfig.*',
+        '**/Manifest*.*'
+    ],
+    coverageThreshold: 1.0,
+]
+
+task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+    reports {
+        html.enabled = true
+        xml.enabled = true
+    }
+
+    def javaClasses = fileTree(
+            dir: "${buildDir}/intermediates/classes/debug",
+            excludes: jacoco.excludes
+    )
+
+    def kotlinClasses = fileTree(
+            dir: "${buildDir}/tmp/kotlin-classes/debug",
+            excludes: jacoco.excludes
+    )
+
+    group = "Reporting"
+    description = "Generates code coverage report for debug unit tests."
+    classDirectories.from(files([javaClasses], [kotlinClasses]))
+    additionalSourceDirs.from(files([jacoco.sourceDirs]))
+    sourceDirectories.from(files([jacoco.sourceDirs]))
+    executionData.from(fileTree(dir: "${buildDir}", includes: ["jacoco/testDebugUnitTest.exec"]))
+}
+
+task jacocoCoverageVerification(type: JacocoCoverageVerification, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+    violationRules {
+        rule {
+            limit {
+                minimum = jacoco.coverageThreshold
+            }
+        }
+    }
+
+    def javaClasses = fileTree(
+            dir: "${buildDir}/intermediates/classes/debug",
+            excludes: jacoco.excludes
+    )
+
+    def kotlinClasses = fileTree(
+            dir: "${buildDir}/tmp/kotlin-classes/debug",
+            excludes: jacoco.excludes
+    )
+
+    group = "Verification"
+    description = "Runs code coverage verification on debug unit tests."
+    classDirectories.from(files([javaClasses], [kotlinClasses]))
+    additionalSourceDirs.from(files([jacoco.sourceDirs]))
+    sourceDirectories.from(files([jacoco.sourceDirs]))
+    executionData.from(fileTree(dir: "${buildDir}", includes: ["jacoco/testDebugUnitTest.exec"]))
+}
+
+check.dependsOn jacocoCoverageVerification

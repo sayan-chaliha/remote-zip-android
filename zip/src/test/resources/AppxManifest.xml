@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Package IgnorableNamespaces="uap uap2 uap3" xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:uap2="http://schemas.microsoft.com/appx/manifest/uap/windows10/2" xmlns:uap3="http://schemas.microsoft.com/appx/manifest/uap/windows10/3">
+  <Identity Name="1b58ad9c-9af7-49b1-b363-2d4e233e433d" Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" Version="1.0.2012.17002"/>
+  <Properties>
+    <DisplayName>Remote Zip Test</DisplayName>
+    <PublisherDisplayName>Microsoft</PublisherDisplayName>
+		<Logo>test.png</Logo>
+  </Properties>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.10240.0" MaxVersionTested="12.0.0.0"/>
+    <TargetDeviceFamily Name="Platform.All" MinVersion="0.0.0.0" MaxVersionTested="0.0.0.0"/>
+  </Dependencies>
+  <Resources>
+    <Resource Language="en-us"/>
+  </Resources>
+  <Applications>
+    <Application Id="Microsoft.Office.Zip.FA0000018">
+			<uap:VisualElements DisplayName="Remote Zip Test" Square150x150Logo="test.png" Square44x44Logo="test.png" Description="Remote Zip test AppX extraction" BackgroundColor="transparent" AppListEntry="none"/>
+    </Application>
+  </Applications>
+</Package>
