@@ -24,9 +24,19 @@
 
 package com.microsoft.office.zip
 
+import com.microsoft.office.zip.internal.ZipReaderImpl
+import com.microsoft.office.zip.internal.cache.Cache
+import com.microsoft.office.zip.internal.cache.FileCache
+import com.microsoft.office.zip.internal.cache.MemoryCache
+import com.microsoft.office.zip.internal.input.FileRandomAccessInput
+import com.microsoft.office.zip.internal.input.HttpRandomAccessInput
+import com.microsoft.office.zip.internal.input.RandomAccessInput
 import java.io.Closeable
+import java.io.File
 import java.io.IOException
 import java.io.InputStream
+import java.net.URL
+import okhttp3.OkHttpClient
 
 /**
  * Interface for reading ZIP files.
@@ -95,4 +105,63 @@ interface ZipReader : Closeable {
      */
     @Throws(IOException::class)
     fun cacheFiles(names: List<String>)
+
+    /**
+     * Builder for configuring a new [ZipReader].
+     */
+    class Builder {
+        private var file: File? = null
+        private var url: URL? = null
+        private var useMemoryCache = false
+
+        /**
+         * Sets the input ZIP [File].
+         */
+        fun file(file: File) = apply { this.file = file }
+
+        /**
+         * Sets the input ZIP [URL].
+         */
+        fun url(url: URL) = apply { this.url = url }
+
+        /**
+         * Enables caching in memory.
+         *
+         * @see [MemoryCache]
+         */
+        fun useMemoryCache() = apply { this.useMemoryCache = true }
+
+        /**
+         * Enables file-based caching. Useful if file streams from a remote archive are accessed
+         * multiple times. This is the default behavior.
+         *
+         * @see [FileCache]
+         */
+        fun useFileCache() = apply { this.useMemoryCache = false }
+
+        /**
+         * Creates a new [ZipReader] from the configuration provided.
+         *
+         * @return [ZipReader]
+         */
+        fun build(): ZipReader {
+            require(file != null || url != null) {
+                "Either file or URL input must be specified."
+            }
+
+            val cache: Cache = if (useMemoryCache) MemoryCache() else FileCache()
+            val input: RandomAccessInput = if (file != null) {
+                FileRandomAccessInput(file!!)
+            } else {
+                val okHttpClient = OkHttpClient.Builder()
+                    .build()
+                HttpRandomAccessInput(url!!, okHttpClient)
+            }
+
+            return ZipReaderImpl(
+                input = input,
+                cache = cache
+            )
+        }
+    }
 }
