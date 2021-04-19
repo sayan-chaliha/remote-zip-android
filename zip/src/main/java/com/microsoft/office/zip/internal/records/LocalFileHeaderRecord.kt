@@ -114,7 +114,7 @@ internal data class LocalFileHeaderRecord(
 
                 val extraFieldLength = buffer.short.toInt()
                 require(extraFieldLength == 0) {
-                    "Bad Local File Header unsupported extra field size: $extraFieldLength " +
+                    "Bad Local File Header unsupported extra field length: $extraFieldLength " +
                         "(expected: 0)"
                 }
 

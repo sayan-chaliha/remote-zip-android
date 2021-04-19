@@ -24,6 +24,7 @@
 
 package com.microsoft.office.zip.internal.records
 
+import com.microsoft.office.zip.TestUtil
 import com.microsoft.office.zip.ZipException
 import com.microsoft.office.zip.internal.CompressionMethod
 import com.microsoft.office.zip.internal.ZipConstants
@@ -55,7 +56,7 @@ class CentralFileHeaderRecordTest {
         private const val TEST_DIR_NAME = "test/"
         private val TEST_LAST_MODIFIED_TIME = Date()
         private val TEST_LAST_ACCESS_TIME = Date()
-        private val TEST_CREATED_TIME = Date()
+        private val TEST_CREATION_TIME = Date()
         private val TEST_EXT_LAST_MODIFIED_TIME: Date
             get() {
                 val cal = Calendar.getInstance()
@@ -90,10 +91,9 @@ class CentralFileHeaderRecordTest {
         assertEquals("Parsed file name is incorrect.", TEST_FILE_NAME, cfh.fileName)
 
         // ZIP looses accuracy in date/time
-        assertEquals(
+        assertTrue(
             "Parsed last modified time is incorrect",
-            ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(TEST_LAST_MODIFIED_TIME)),
-            cfh.lastModifiedTime
+            TestUtil.dateAlmostEquals(TEST_LAST_MODIFIED_TIME, cfh.lastModifiedTime)
         )
 
         assertEquals("Parsed CRC32 is incorrect", TEST_CRC32.toUInt(), cfh.crc32)
@@ -137,11 +137,9 @@ class CentralFileHeaderRecordTest {
 
         assertEquals("Parsed file name is incorrect.", TEST_DIR_NAME, cfh.fileName)
 
-        // ZIP looses accuracy in date/time
-        assertEquals(
+        assertTrue(
             "Parsed last modified time is incorrect",
-            ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(TEST_LAST_MODIFIED_TIME)),
-            cfh.lastModifiedTime
+            TestUtil.dateAlmostEquals(TEST_LAST_MODIFIED_TIME, cfh.lastModifiedTime)
         )
 
         assertEquals("Parsed CRC32 is incorrect", 0.toUInt(), cfh.crc32)
@@ -306,26 +304,23 @@ class CentralFileHeaderRecordTest {
         val extTimeInfo = ExtendedTimestampInfoRecord(
             lastAccessTime = TEST_LAST_ACCESS_TIME,
             lastModifiedTime = TEST_EXT_LAST_MODIFIED_TIME,
-            creationTime = TEST_CREATED_TIME
+            creationTime = TEST_CREATION_TIME
         )
 
         val buffer = createFileBuffer(extraFields = arrayOf(extTimeInfo))
         val cfh = CentralFileHeaderRecord.from(buffer)
 
-        assertEquals(
+        assertTrue(
             "Parsed extended last modified time is incorrect",
-            extendedTime(TEST_EXT_LAST_MODIFIED_TIME),
-            cfh.lastModifiedTime.time
+            TestUtil.dateAlmostEquals(TEST_EXT_LAST_MODIFIED_TIME, cfh.lastModifiedTime)
         )
-        assertEquals(
+        assertTrue(
             "Parsed last access time is incorrect",
-            extendedTime(TEST_LAST_ACCESS_TIME),
-            cfh.lastAccessTime!!.time
+            TestUtil.dateAlmostEquals(TEST_LAST_ACCESS_TIME, cfh.lastAccessTime!!)
         )
-        assertEquals(
-            "Parsed created time is incorrect",
-            extendedTime(TEST_CREATED_TIME),
-            cfh.creationTime!!.time
+        assertTrue(
+            "Parsed creation time is incorrect",
+            TestUtil.dateAlmostEquals(TEST_CREATION_TIME, cfh.creationTime!!)
         )
     }
 

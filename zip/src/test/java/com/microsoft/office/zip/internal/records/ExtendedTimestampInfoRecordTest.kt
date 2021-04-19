@@ -24,13 +24,12 @@
 
 package com.microsoft.office.zip.internal.records
 
+import com.microsoft.office.zip.TestUtil
 import com.microsoft.office.zip.ZipException
-import com.microsoft.office.zip.internal.ZipUtils
 import java.nio.BufferUnderflowException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.util.Date
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -44,9 +43,9 @@ import org.mockito.junit.MockitoJUnitRunner
 class ExtendedTimestampInfoRecordTest {
     companion object {
         // Remove accuracy from dates
-        private val TEST_LAST_MODIFIED_TIME = ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(Date()))
-        private val TEST_LAST_ACCESS_TIME = ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(Date()))
-        private val TEST_CREATED_TIME = ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(Date()))
+        private val TEST_LAST_MODIFIED_TIME = Date()
+        private val TEST_LAST_ACCESS_TIME = Date()
+        private val TEST_CREATION_TIME = Date()
     }
 
     @Mock
@@ -62,27 +61,24 @@ class ExtendedTimestampInfoRecordTest {
         val buffer = ExtendedTimestampInfoRecord(
             lastModifiedTime = TEST_LAST_MODIFIED_TIME,
             lastAccessTime = TEST_LAST_ACCESS_TIME,
-            creationTime = TEST_CREATED_TIME
+            creationTime = TEST_CREATION_TIME
         ).serialize()
 
         val extTsInfo = ZipExtraField.from(ByteBuffer.wrap(buffer))
         assertTrue(extTsInfo is ExtendedTimestampInfoRecord)
 
         with(extTsInfo as ExtendedTimestampInfoRecord) {
-            assertEquals(
-                "Parsed created time is incorrect",
-                ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(TEST_CREATED_TIME)),
-                creationTime
+            assertTrue(
+                "Parsed creation time is incorrect",
+                TestUtil.dateAlmostEquals(TEST_CREATION_TIME, creationTime!!)
             )
-            assertEquals(
+            assertTrue(
                 "Parsed modified time is incorrect",
-                ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(TEST_LAST_MODIFIED_TIME)),
-                lastModifiedTime
+                TestUtil.dateAlmostEquals(TEST_LAST_MODIFIED_TIME, lastModifiedTime!!)
             )
-            assertEquals(
+            assertTrue(
                 "Parsed access time is incorrect",
-                ZipUtils.dosToJavaTime(ZipUtils.javaToDosTime(TEST_LAST_ACCESS_TIME)),
-                lastAccessTime
+                TestUtil.dateAlmostEquals(TEST_LAST_ACCESS_TIME, lastAccessTime!!)
             )
         }
     }

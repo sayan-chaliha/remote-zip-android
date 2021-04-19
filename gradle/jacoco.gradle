@@ -10,7 +10,7 @@ ext.jacoco = [
         '**/BuildConfig.*',
         '**/Manifest*.*'
     ],
-    coverageThreshold: 1.0,
+    coverageThreshold: 0.9,
 ]
 
 task jacocoCoverageReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
